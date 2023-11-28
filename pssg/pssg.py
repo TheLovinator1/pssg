@@ -1,7 +1,14 @@
+import os
 from pathlib import Path
 
 import mistune
-from loguru import logger
+import typer
+from rich import print
+from rich.progress import track
+
+app = typer.Typer()
+
+CONTENT_DIR: Path = Path(os.getenv("CONTENT_DIR", "content"))
 
 
 def generate_html_from_markdown(markdown_file: Path, output_file: Path) -> Path:
@@ -25,14 +32,20 @@ def generate_html_from_markdown(markdown_file: Path, output_file: Path) -> Path:
     with Path.open(output_file, "w") as f:
         f.write(html)
 
-    logger.debug(f"Generated HTML file: {output_file}")
+    print(f"[green]Generated[/green] HTML file: {output_file}")
     return output_file
 
 
-if __name__ == "__main__":
-    content_dir = Path("content")
-    for file in content_dir.glob("*.md"):
+@app.command(name="build", help="Build static site.")
+def build() -> None:
+    """Build static site."""
+    for file in track(CONTENT_DIR.glob("*.md"), description="Processing..."):
         output_file: Path = Path("public") / (file.stem + ".html")
         output_file.parent.mkdir(parents=True, exist_ok=True)
 
+        # TODO: Only generate HTML if Markdown file has changed. Check timestamp?
         generate_html_from_markdown(file, output_file)
+
+
+if __name__ == "__main__":
+    app()
