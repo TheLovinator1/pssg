@@ -12,18 +12,10 @@ CONTENT_DIR: Path = Path(os.getenv("CONTENT_DIR", "content"))
 
 
 def generate_html_from_markdown(markdown_file: Path, output_file: Path) -> Path:
-    """Generate HTML from Markdown file.
-
-    Args:
-        markdown_file: Path to Markdown file.
-        output_file: Path to output HTML file.
-
-    Returns:
-        Path: Path to output HTML file.
-    """
-    # TODO: Only generate HTML if Markdown file has changed. Check timestamp?
+    """Generate HTML from Markdown file."""
     with Path.open(markdown_file) as f:
         markdown: str = f.read()
+
     html: str = mistune.html(markdown)  # type: ignore  # noqa: PGH003
     if not html:
         msg = "Markdown file is empty."
